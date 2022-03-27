@@ -33,7 +33,7 @@ const UserSchema = {
 
   mongoose: mongoose.model("User", {
     username: { type: String, minLength: 1, maxLength: 30, required: true },
-    uuid: String,
+    uuid: { type: String, required: true },
   }),
 };
 
