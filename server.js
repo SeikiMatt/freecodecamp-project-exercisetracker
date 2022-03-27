@@ -37,6 +37,30 @@ const UserSchema = {
   }),
 };
 
+const ExerciseSchema = {
+  joi: Joi.object({
+    userId: Joi.string().uuid().required(),
+    description: Joi.string().min(1).max(20).required(),
+    duration: Joi.number()
+      .min(1)
+      .max(60 * 24)
+      .required(),
+    date: Joi.date()
+      .custom((value, helper) => {
+        if (isValidISO8601CompleteDate(value)) return true;
+        else return helper.message('"date" must be in YYYY-MM-DD format');
+      })
+      .iso()
+      .min("now"),
+  }),
+
+  mongoose: mongoose.model("Exercise", {
+    userUuid: { type: String, required: true },
+    description: { type: String, minLength: 1, maxLenght: 20, required: true },
+    duration: { type: Number, min: 1, max: 60 * 24, required: true },
+    date: { type: Date, required: true },
+  }),
+};
 
 app.use(helmet());
 app.use(cors());
