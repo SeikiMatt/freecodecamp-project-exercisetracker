@@ -13,7 +13,7 @@ const app = express();
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@freecodecamp.0uq3m.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`
   )
   .catch((err) => console.log(err));
 
