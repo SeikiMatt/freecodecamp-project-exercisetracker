@@ -103,51 +103,23 @@ app.post("/api/users", async (req, res) => {
 });
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
-  console.log(req.body);
-  const data = {
-    id: req.body[":_id"] === null ? "" : String(req.body[":_id"]),
-    description:
-      req.body.description === null ? "" : String(req.body.description),
-    duration: req.body.duration === null ? 0 : Number(req.body.duration),
-    date: req.body.date ? new Date(data.date) : new Date(),
+  const reqData = {
+    userId: req.params._id,
+    description: req.body.description,
+    duration: req.body.duration ? Number(req.body.duration) : 0,
+    date: req.body.date ? new Date(req.body.date) : new Date(),
   };
-  const validation = ExerciseSchema.joi.validate(data, { abortEarly: false });
-
-  if (validation.error) {
-    res.status(400).json({
-      error: prettifyJoiError(validation.error),
-    });
-    return;
-  }
 
   try {
-    const userDoc = await UserModel.findOne({ uuid: data.id });
-    const newExercise = new ExerciseModel({
-      userId: data.id,
-      description: data.description,
-      duration: data.duration,
-      date: data.date,
-    });
-
+    const newExercise = new ExerciseModel(reqData);
     newExercise.save();
 
-    res.json({
-      _id: data.id,
-      username: userDoc.username,
-      date: data.date.toDateString(),
-      duration: data.duration,
-      description: data.description,
-    });
+    res.json(reqData);
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      error: "database error",
-    });
+    res.status(500).json(err);
     return;
   }
-
-  res.end();
-  return;
 });
 
 app.get("/api/users/:_id/logs", async (req, res) => {
