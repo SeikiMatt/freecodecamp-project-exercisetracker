@@ -85,28 +85,16 @@ app.get("/api/users", async (req, res) => {
 app.post("/api/users", async (req, res) => {
   const username = req.body.username === null ? "" : String(req.body.username); // needs proper escaping/sanitizing(?)
   const uuid = uuidv4();
-  const validation = UserSchema.joi.validate(
-    { username, uuid },
-    { abortEarly: false }
-  );
-
-  // not sure about this, still studying better ways to handle errors
-  if (validation.error) {
-    res.status(400).json({
-      error: prettifyJoiError(validation.error),
-    });
-    return;
-  }
 
   try {
     const duplicate = await UserModel.findOne({ username });
 
     if (duplicate !== null) {
-      res.json({ username, _id: duplicate.uuid });
+      res.json({ username, _id: duplicate._id });
       return;
     }
 
-    const newEntry = new UserModel({ username, uuid });
+    const newEntry = new UserModel({ username, _id: uuid });
     await newEntry.save();
 
     res.json({ username, _id: uuid });
