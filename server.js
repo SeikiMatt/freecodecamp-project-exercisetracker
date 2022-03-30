@@ -38,6 +38,7 @@ const ExerciseSchema = {
   }),
 
   mongoose: new mongoose.Schema({
+    userId: { type: String, required: true },
     description: { type: String, minLength: 1, maxLenght: 20, required: true },
     duration: { type: Number, min: 1, max: 60 * 24, required: true },
     date: { type: Date, required: true },
@@ -57,7 +58,7 @@ const UserSchema = {
   }),
 };
 
-// const ExerciseModel = mongoose.model("Exercise", UserSchema.mongoose)
+const ExerciseModel = mongoose.model("Exercise", ExerciseSchema.mongoose);
 const UserModel = mongoose.model("User", UserSchema.mongoose);
 
 // app.use(helmet());
@@ -128,14 +129,14 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 
   try {
     const userDoc = await UserModel.findOne({ uuid: data.id });
-    const newSubEntry = {
+    const newExercise = new ExerciseModel({
+      userId: data.id,
       description: data.description,
       duration: data.duration,
       date: new Date(data.date),
-    };
+    });
 
-    userDoc.exercises.push(newSubEntry);
-    userDoc.save();
+    newExercise.save();
 
     res.json({
       _id: data.id,
@@ -156,6 +157,48 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   return;
 });
 
+app.get("/api/users/:_id/logs", async (req, res) => {
+  console.log(req.params, req.query);
+  const userId = req.params["_id"];
+  const dateFrom = new Date(req.query.from);
+  const dateTo = new Date(req.query.to);
+
+  console.log(dateFrom, dateTo);
+
+  try {
+    const userDoc = await UserModel.findOne({ uuid: userId });
+    const exerciseCount = await ExerciseModel.count({ userId });
+    const exercises = await ExerciseModel.find(
+      {
+        userId,
+        date: {
+          $gte: dateFrom ? dateFrom : new Date("1970-01-01"),
+          $lt: dateTo ? dateTo : new Date("2099-01-01"),
+        },
+      },
+      { _id: 0, description: 1, duration: 1, date: 1 }
+    )
+      .sort({ date: 1 })
+      .limit(req.query.limit);
+
+    res.json({
+      username: userDoc.username,
+      count: exerciseCount,
+      _id: userId,
+      log: exercises,
+    });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: "database error",
+    });
+    return;
+  }
+
+  res.end();
+  return;
+});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
