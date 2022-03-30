@@ -72,13 +72,12 @@ app.get("/", (_, res) => {
 
 app.get("/api/users", async (req, res) => {
   try {
-    const users = UserModel.find({});
-    res.json(users);
+    const users = await UserModel.find({}, { _id: 1, username: 1 });
+    res.json([...users]);
     return;
   } catch (err) {
-    res.status(500).json({
-      error: "database error",
-    });
+    console.log(err);
+    res.status(500).json(err);
     return;
   }
 });
