@@ -87,13 +87,6 @@ app.post("/api/users", async (req, res) => {
   const uuid = uuidv4();
 
   try {
-    const duplicate = await UserModel.findOne({ username });
-
-    if (duplicate !== null) {
-      res.json({ username, _id: duplicate._id });
-      return;
-    }
-
     const newEntry = new UserModel({ username, _id: uuid });
     await newEntry.save();
 
