@@ -70,6 +70,19 @@ app.get("/", (_, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = UserModel.find({});
+    res.json(users);
+    return;
+  } catch (err) {
+    res.status(500).json({
+      error: "database error",
+    });
+    return;
+  }
+});
+
 app.post("/api/users", async (req, res) => {
   const username = req.body.username === null ? "" : String(req.body.username); // needs proper escaping/sanitizing(?)
   const uuid = uuidv4();
@@ -116,7 +129,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     description:
       req.body.description === null ? "" : String(req.body.description),
     duration: req.body.duration === null ? 0 : Number(req.body.duration),
-    date: req.body.date === null ? "" : String(req.body.date),
+    date: req.body.date ? new Date(data.date) : new Date(),
   };
   const validation = ExerciseSchema.joi.validate(data, { abortEarly: false });
 
@@ -133,7 +146,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       userId: data.id,
       description: data.description,
       duration: data.duration,
-      date: new Date(data.date),
+      date: data.date,
     });
 
     newExercise.save();
@@ -141,7 +154,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     res.json({
       _id: data.id,
       username: userDoc.username,
-      date: new Date(data.date).toDateString(),
+      date: data.date.toDateString(),
       duration: data.duration,
       description: data.description,
     });
