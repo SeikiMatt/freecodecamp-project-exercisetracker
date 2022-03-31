@@ -92,9 +92,7 @@ app.post("/api/users", async (req, res) => {
 
     res.json({ username, _id: uuid });
   } catch (err) {
-    res.status(500).json({
-      error: "database error",
-    });
+    res.status(500).json(err);
     return;
   }
 
@@ -155,9 +153,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      error: "database error",
-    });
+    res.status(500).json(err);
     return;
   }
 
