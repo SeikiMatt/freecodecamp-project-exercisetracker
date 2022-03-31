@@ -3,9 +3,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
-import { v4 as uuidv4 } from "uuid";
 import mongoose from "mongoose";
-import { query } from "express";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -48,7 +46,7 @@ app.get("/api/users", async (req, res) => {
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).json({ error: err });
     return;
   }
 });
@@ -92,7 +90,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).json({ error: err });
     return;
   }
 });
@@ -141,7 +139,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).json({ error: err });
     return;
   }
 });
