@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 import { v4 as uuidv4 } from "uuid";
 import mongoose from "mongoose";
+import { query } from "express";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -98,8 +99,10 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 
 app.get("/api/users/:_id/logs", async (req, res) => {
   const userId = req.params._id;
-  const dateFrom = req.query.from ? new Date(req.query.from) : null;
-  const dateTo = req.query.from ? new Date(req.query.to) : null;
+  const from = req.query.from
+    ? new Date(req.query.from)
+    : new Date("1970-01-01");
+  const to = req.query.to ? new Date(req.query.to) : new Date("2099-01-01");
   const limit = Number(req.query.limit);
 
   try {
@@ -109,8 +112,8 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       {
         userId: userId,
         date: {
-          $gte: dateFrom ? dateFrom : new Date("1970-01-01"),
-          $lt: dateTo ? dateTo : new Date("2099-01-01"),
+          $gte: from,
+          $lt: to,
         },
       },
       { _id: 0, description: 1, duration: 1, date: 1 }
@@ -118,7 +121,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       .sort({ date: 1 })
       .limit(limit);
 
-    res.json({
+    const response = {
       username: userDoc.username,
       count: exerciseCount,
       _id: userId,
@@ -129,7 +132,12 @@ app.get("/api/users/:_id/logs", async (req, res) => {
           date: entry.date.toDateString(),
         };
       }),
-    });
+    };
+
+    if (req.query.from) response.from = from.toDateString();
+    if (req.query.to) response.to = to.toDateString();
+
+    res.json(response);
     return;
   } catch (err) {
     console.log(err);
