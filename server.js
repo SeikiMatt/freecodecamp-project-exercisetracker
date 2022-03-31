@@ -78,10 +78,17 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   };
 
   try {
+    const userDoc = await UserModel.findOne({ _id: reqData.userId });
     const newExercise = new ExerciseModel(reqData);
     newExercise.save();
 
-    res.json(reqData);
+    res.json({
+      _id: reqData.userId,
+      username: userDoc.username,
+      description: reqData.description,
+      duration: reqData.duration,
+      date: reqData.date.toDateString(),
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
