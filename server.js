@@ -122,7 +122,13 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       username: userDoc.username,
       count: exerciseCount,
       _id: userId,
-      log: exercises,
+      log: exercises.map((entry) => {
+        return {
+          description: entry.description,
+          duration: entry.duration,
+          date: entry.date.toDateString(),
+        };
+      }),
     });
     return;
   } catch (err) {
