@@ -2,11 +2,9 @@ import "dotenv/config";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import express from "express";
-import helmet from "helmet";
 import cors from "cors";
 import { v4 as uuidv4 } from "uuid";
 import mongoose from "mongoose";
-import Joi from "joi";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -19,47 +17,20 @@ mongoose
 
 mongoose.connection.on("error", (err) => console.log(err));
 
-function prettifyJoiError(joiError) {
-  // only valid for simple schemas
-  return joiError.details.length > 1
-    ? joiError.details.map((entry) => entry.message)
-    : joiError.details[0].message;
-}
+const ExerciseSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  description: { type: String, minLength: 1, maxLenght: 20, required: true },
+  duration: { type: Number, min: 1, max: 60 * 24, required: true },
+  date: { type: Date, required: true },
+});
 
-const ExerciseSchema = {
-  joi: Joi.object({
-    id: Joi.string().uuid().required(),
-    description: Joi.string().min(1).max(20).required(),
-    duration: Joi.number()
-      .min(1)
-      .max(60 * 24)
-      .required(),
-    date: Joi.date().iso().min("now"),
-  }),
+const UserSchema = new mongoose.Schema({
+  username: { type: String, minLength: 1, maxLength: 30, required: true },
+  _id: { type: String, required: true },
+});
 
-  mongoose: new mongoose.Schema({
-    userId: { type: String, required: true },
-    description: { type: String, minLength: 1, maxLenght: 20, required: true },
-    duration: { type: Number, min: 1, max: 60 * 24, required: true },
-    date: { type: Date, required: true },
-  }),
-};
-
-const UserSchema = {
-  joi: Joi.object({
-    username: Joi.string().min(1).max(30).required(),
-    uuid: Joi.string().uuid().required(),
-  }),
-
-  mongoose: new mongoose.Schema({
-    username: { type: String, minLength: 1, maxLength: 30, required: true },
-    uuid: { type: String, required: true },
-    exercises: [ExerciseSchema.mongoose], // {type: ExerciseSchema.mongoose, default: () =>[{}]} ?
-  }),
-};
-
-const ExerciseModel = mongoose.model("Exercise", ExerciseSchema.mongoose);
-const UserModel = mongoose.model("User", UserSchema.mongoose);
+const ExerciseModel = mongoose.model("Exercise", ExerciseSchema);
+const UserModel = mongoose.model("User", UserSchema);
 
 // app.use(helmet());
 app.use(cors());
