@@ -26,7 +26,6 @@ const ExerciseSchema = new mongoose.Schema({
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, minLength: 1, maxLength: 30, required: true },
-  _id: { type: String, required: true },
 });
 
 const ExerciseModel = mongoose.model("Exercise", ExerciseSchema);
