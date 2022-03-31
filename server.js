@@ -85,9 +85,9 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     res.json({
       _id: reqData.userId,
       username: userDoc.username,
-      description: reqData.description,
-      duration: reqData.duration,
       date: reqData.date.toDateString(),
+      duration: reqData.duration,
+      description: reqData.description,
     });
   } catch (err) {
     console.log(err);
@@ -97,13 +97,6 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", async (req, res) => {
-  console.log(req.params, req.query);
-  const userId = req.params["_id"];
-  const dateFrom = new Date(req.query.from);
-  const dateTo = new Date(req.query.to);
-
-  console.log(dateFrom, dateTo);
-
   try {
     const userDoc = await UserModel.findOne({ uuid: userId });
     const exerciseCount = await ExerciseModel.count({ userId });
@@ -132,9 +125,6 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     res.status(500).json(err);
     return;
   }
-
-  res.end();
-  return;
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
