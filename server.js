@@ -97,12 +97,17 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", async (req, res) => {
+  const userId = req.params._id;
+  const dateFrom = req.query.from ? new Date(req.query.from) : null;
+  const dateTo = req.query.from ? new Date(req.query.to) : null;
+  const limit = Number(req.query.limit);
+
   try {
-    const userDoc = await UserModel.findOne({ uuid: userId });
-    const exerciseCount = await ExerciseModel.count({ userId });
+    const userDoc = await UserModel.findOne({ _id: userId });
+    const exerciseCount = await ExerciseModel.count({ userId: userId });
     const exercises = await ExerciseModel.find(
       {
-        userId,
+        userId: userId,
         date: {
           $gte: dateFrom ? dateFrom : new Date("1970-01-01"),
           $lt: dateTo ? dateTo : new Date("2099-01-01"),
@@ -111,7 +116,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       { _id: 0, description: 1, duration: 1, date: 1 }
     )
       .sort({ date: 1 })
-      .limit(req.query.limit);
+      .limit(limit);
 
     res.json({
       username: userDoc.username,
