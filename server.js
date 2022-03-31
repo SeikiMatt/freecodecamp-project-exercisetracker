@@ -54,21 +54,20 @@ app.get("/api/users", async (req, res) => {
 });
 
 app.post("/api/users", async (req, res) => {
-  const username = req.body.username === null ? "" : String(req.body.username); // needs proper escaping/sanitizing(?)
-  const uuid = uuidv4();
+  const username = req.body.username === null ? "" : String(req.body.username);
 
   try {
-    const newEntry = new UserModel({ username, _id: uuid });
-    await newEntry.save();
+    const newEntry = new UserModel({
+      username,
+    });
+    const savedEntry = await newEntry.save();
 
-    res.json({ username, _id: uuid });
+    res.json({ username, _id: savedEntry._id.toString() });
   } catch (err) {
-    res.status(500).json(err);
+    console.log(err);
+    res.status(500).json({ error: err });
     return;
   }
-
-  res.end();
-  return;
 });
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
